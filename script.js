@@ -125,14 +125,31 @@ function showToast(message) {
     }, 2000);
 }
 
-// 共有ターゲット（Web Share Target API）からの起動時処理やクエリパラメータ対応
-window.addEventListener('DOMContentLoaded', () => {
+// 共有ターゲット（Web Share Target API）からの起動時処理（GETおよびPOST/Files対応）
+window.addEventListener('DOMContentLoaded', async () => {
+    // URLのクエリパラメータをチェック（GET経由の共有）
     const urlParams = new URLSearchParams(window.location.search);
     const sharedText = urlParams.get('text');
     const sharedTitle = urlParams.get('title');
-    
-    if (sharedText) {
+    const sharedUrl = urlParams.get('url');
+
+    if (sharedText || sharedTitle || sharedUrl) {
+        const content = [sharedTitle, sharedText, sharedUrl].filter(Boolean).join('\n');
         fileNameEl.textContent = sharedTitle || '共有されたテキスト';
-        displayTextContent(sharedText);
+        displayTextContent(content);
+        return;
+    }
+
+    // Service Workerなどから送られてくる可能性のあるシェアデータや、
+    // 将来的なファイル共有（navigator.shareTarget等でファイルがPOSTされるケースなど）に対応するため、
+    // キャッシュやIndexedDB、あるいはService WorkerからのpostMessageを受け取る仕組みを考慮しつつ、
+    // 標準的なURLSearchParams以外に、もしwindowにストリームやファイルが存在すれば処理する
+    if (navigator.serviceWorker) {
+        navigator.serviceWorker.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'SHARED_FILE') {
+                fileNameEl.textContent = event.data.fileName || '共有ファイル';
+                displayTextContent(event.data.content);
+            }
+        });
     }
 });
