@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Share Viewer</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+</head>
+<body>
+    <header>
+        <h1>Text Share Viewer</h1>
+        <div class="actions">
+            <input type="file" id="fileInput" accept=".txt,.html,.json,.svg,.md,.js,.css,text/*" style="display: none;">
+            <button id="openBtn" class="btn primary">ファイルを開く</button>
+        </div>
+    </header>
+
+    <main>
+        <div id="dropZone" class="drop-zone">
+            <p>ここにファイルをドロップするか、<br>「ファイルを開く」を押してください</p>
+        </div>
+
+        <div id="viewerSection" class="viewer-section" style="display: none;">
+            <div class="toolbar">
+                <span id="fileName" class="file-name"></span>
+                <button id="copyAllBtn" class="btn secondary">一括コピー</button>
+            </div>
+            
+            <div id="splitContainer" class="split-container">
+                <!-- 分割コピー用のフォームがここに動的に生成されます -->
+            </div>
+        </div>
+    </main>
+
+    <div id="toast" class="toast">コピーしました</div>
+
+    <script src="script.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker registered', reg))
+                    .catch(err => console.log('Service Worker registration failed', err));
+            });
+        }
+    </script>
+</body>
+</html>
